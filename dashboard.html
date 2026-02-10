@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zone 4 Analytics Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <h3>Loading TSV Data...</h3>
+        <p id="loadingStatus">Reading csv.csv file...</p>
+    </div>
+
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-chart-bar"></i>
+                <div>
+                    <h1>Zone 4 Analytics Dashboard</h1>
+                    <div class="logo-subtitle">
+                        <span>Complete Housing Schemes Data Analysis</span>
+                        <span class="record-counter">
+                            <i class="fas fa-database"></i>
+                            <span id="totalRecords">0</span> records loaded
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-outline-light" onclick="exportFilteredData()">
+                    <i class="fas fa-download"></i> Export Data
+                </button>
+                <button class="btn btn-light ms-2" onclick="refreshData()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Sidebar Filters -->
+        <aside class="sidebar-filters">
+            <!-- AD Filter -->
+            <div class="filter-section">
+                <div class="filter-title">
+                    <div class="filter-title-text">
+                        <i class="fas fa-user-tie"></i>
+                        AD Name Filter
+                    </div>
+                    <span class="filter-count" id="adCount">0</span>
+                </div>
+                <div class="filter-options" id="adFilter">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Scheme Filter -->
+            <div class="filter-section">
+                <div class="filter-title">
+                    <div class="filter-title-text">
+                        <i class="fas fa-building"></i>
+                        Scheme Filter
+                    </div>
+                    <span class="filter-count" id="schemeCount">0</span>
+                </div>
+                <div class="filter-options" id="schemeFilter">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="filter-section">
+                <div class="filter-title">
+                    <div class="filter-title-text">
+                        <i class="fas fa-clipboard-check"></i>
+                        Status Filter
+                    </div>
+                    <span class="filter-count" id="statusCount">0</span>
+                </div>
+                <div class="filter-options" id="statusFilter">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="filter-section">
+                <div class="filter-title">
+                    <div class="filter-title-text">
+                        <i class="fas fa-tag"></i>
+                        Category Filter
+                    </div>
+                    <span class="filter-count" id="categoryCount">0</span>
+                </div>
+                <div class="filter-options" id="categoryFilter">
+                    <div class="filter-option" onclick="toggleFilter('Category_Z', 'ILLEGAL')">
+                        <input type="checkbox" class="filter-checkbox" id="cat-illegal">
+                        ILLEGAL
+                    </div>
+                    <div class="filter-option" onclick="toggleFilter('Category_Z', 'PERM. COMM')">
+                        <input type="checkbox" class="filter-checkbox" id="cat-perm">
+                        PERM. COMM
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="filter-section">
+                <button class="btn btn-primary w-100 mb-2" onclick="applyFilters()">
+                    <i class="fas fa-filter"></i> Apply Filters
+                </button>
+                <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                    <i class="fas fa-times"></i> Clear All Filters
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Summary Cards -->
+            <section class="summary-cards">
+                <div class="summary-card total-dues">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Total Dues</div>
+                            <h3 class="card-value" id="totalDues">0</h3>
+                        </div>
+                        <div class="card-icon total-dues">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                    </div>
+                    <div class="card-change">All schemes combined</div>
+                </div>
+
+                <div class="summary-card paid-2025">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Paid in 2025</div>
+                            <h3 class="card-value" id="paid2025">0</h3>
+                        </div>
+                        <div class="card-icon paid-2025">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                    </div>
+                    <div class="card-change">Current year payments</div>
+                </div>
+
+                <div class="summary-card paid-2024">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Paid in 2024</div>
+                            <h3 class="card-value" id="paid2024">0</h3>
+                        </div>
+                        <div class="card-icon paid-2024">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                    </div>
+                    <div class="card-change">Previous year payments</div>
+                </div>
+
+                <div class="summary-card pending">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Pending Dues</div>
+                            <h3 class="card-value" id="pendingDues">0</h3>
+                        </div>
+                        <div class="card-icon pending">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                    <div class="card-change">Unpaid amount</div>
+                </div>
+
+                <div class="summary-card total-plots">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Total Plots</div>
+                            <h3 class="card-value" id="totalPlots">0</h3>
+                        </div>
+                        <div class="card-icon total-plots">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                    </div>
+                    <div class="card-change">Filtered plots count</div>
+                </div>
+
+                <div class="summary-card illegal-plots">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Illegal Plots</div>
+                            <h3 class="card-value" id="illegalPlots">0</h3>
+                        </div>
+                        <div class="card-icon illegal-plots">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                    <div class="card-change">Require attention</div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="charts-section">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Payment Status Distribution</h3>
+                    </div>
+                    <canvas id="statusChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Schemes by Total Dues</h3>
+                    </div>
+                    <canvas id="schemesChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Data Table -->
+            <section class="data-table-container">
+                <div class="table-header">
+                    <h3 class="table-title">Plot Details</h3>
+                    <div class="table-controls">
+                        <input type="text" id="search-input" placeholder="Search plots..." onkeyup="filterTable()">
+                        <select id="rows-per-page" onchange="updateTable()">
+                            <option value="25">25 rows</option>
+                            <option value="50" selected>50 rows</option>
+                            <option value="100">100 rows</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable(0)">Plot No</th>
+                                <th onclick="sortTable(1)">Scheme</th>
+                                <th onclick="sortTable(2)">Block</th>
+                                <th onclick="sortTable(3)">AD Name</th>
+                                <th onclick="sortTable(4)">Total Dues</th>
+                                <th onclick="sortTable(5)">Paid 2024</th>
+                                <th onclick="sortTable(6)">Paid 2025</th>
+                                <th onclick="sortTable(7)">Pending</th>
+                                <th onclick="sortTable(8)">Status</th>
+                                <th onclick="sortTable(9)">Category</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <button class="page-btn" onclick="changePage(-1)">Previous</button>
+                    <span id="page-info">Page 1 of 1</span>
+                    <button class="page-btn" onclick="changePage(1)">Next</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
