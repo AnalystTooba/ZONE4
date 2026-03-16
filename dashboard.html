@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Illegal Housing · Zone 4 Dashboard</title>
+  <!-- Google Font & Chart.js & Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+<div class="dashboard">
+  <!-- header with timestamp -->
+  <div class="header">
+    <h1>Illegal Housing Survey – Zone 4</h1>
+    <div class="timestamp" id="timestamp"><i class="far fa-clock"></i> Last updated: Just now</div>
+  </div>
+  
+  <!-- navigation -->
+    <div class="nav-tabs">
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="index.html" onclick="return confirm('Opening GIS Maps...')">GIS Maps</a>
+    </div>
+
+  <!-- KPI grid with icons and gradients -->
+  <div class="kpi-grid" id="kpiContainer">
+    <div class="kpi-card" data-filter="illegal" id="cardIllegal">
+      <div class="kpi-icon"><i class="fas fa-ban"></i></div>
+      <div class="kpi-content">
+        <div class="kpi-label">Illegal properties</div>
+        <div class="kpi-value" id="kpiIllegal">—</div>
+      </div>
+    </div>
+    <div class="kpi-card" data-filter="schemes" id="cardSchemes">
+      <div class="kpi-icon"><i class="fas fa-layer-group"></i></div>
+      <div class="kpi-content">
+        <div class="kpi-label">Schemes surveyed</div>
+        <div class="kpi-value" id="kpiSchemes">—</div>
+      </div>
+    </div>
+    <div class="kpi-card" data-filter="target" id="cardTarget">
+      <div class="kpi-icon"><i class="fas fa-bullseye"></i></div>
+      <div class="kpi-content">
+        <div class="kpi-label">Target (Total)</div>
+        <div class="kpi-value" id="kpiTarget">—</div>
+      </div>
+    </div>
+    <div class="kpi-card" data-filter="2024" id="card2024">
+      <div class="kpi-icon"><i class="fas fa-calendar-alt"></i></div>
+      <div class="kpi-content">
+        <div class="kpi-label">Recovery 2024</div>
+        <div class="kpi-value" id="kpi2024">—</div>
+      </div>
+    </div>
+    <div class="kpi-card" data-filter="2025" id="card2025">
+      <div class="kpi-icon"><i class="fas fa-calendar-alt"></i></div>
+      <div class="kpi-content">
+        <div class="kpi-label">Recovery 2025</div>
+        <div class="kpi-value" id="kpi2025">—</div>
+      </div>
+    </div>
+    <div class="kpi-card" data-filter="payments" id="cardPayments">
+      <div class="kpi-icon"><i class="fas fa-credit-card"></i></div>
+      <div class="kpi-content">
+        <div class="kpi-label">Payments count</div>
+        <div class="kpi-value" id="kpiPayments">—</div>
+        <div class="kpi-sparkline" id="sparklinePayments">▁▂▃▄▅▆▇█</div>
+      </div>
+    </div>
+    <div class="kpi-card" data-filter="withdrawals" id="cardWithdrawals">
+      <div class="kpi-icon"><i class="fas fa-exchange-alt"></i></div>
+      <div class="kpi-content">
+        <div class="kpi-label">Withdrawal cases</div>
+        <div class="kpi-value" id="kpiWithdrawals">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- filters row with search and toggle -->
+  <div class="filters-row" id="filterRow">
+    <div class="filter-group">
+      <label for="schemeSelect"><i class="fas fa-filter"></i> Scheme</label>
+      <select id="schemeSelect">
+        <option value="ALL">All Schemes</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="adSelect"><i class="fas fa-user-tie"></i> AD</label>
+      <select id="adSelect">
+        <option value="ALL">All AD</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="statusFilter"><i class="fas fa-tag"></i> Status</label>
+      <select id="statusFilter">
+        <option value="ALL">All Statuses</option>
+        <option value="FULL PAYMENT">Full Payment</option>
+        <option value="PARTIAL PAYMENT">Partial Payment</option>
+        <option value="LITIGATION">Litigation</option>
+        <option value="NOT PAID/ NOTICE ISSUED">Notice Issued</option>
+      </select>
+    </div>
+    <div class="filter-group search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="globalSearch" placeholder="Search plots, blocks...">
+    </div>
+  </div>
+
+  <!-- charts with toggle -->
+  <div class="charts-header">
+    <div class="chart-toggle">
+      <button id="toggleBarChart" class="toggle-btn active"><i class="fas fa-chart-bar"></i> Bar</button>
+      <button id="toggleLineChart" class="toggle-btn"><i class="fas fa-chart-line"></i> Line</button>
+    </div>
+  </div>
+  
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">📊 Recovery by AD (2025)</div>
+      <canvas id="barChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">🥧 Payment status distribution</div>
+      <canvas id="pieChart"></canvas>
+    </div>
+  </div>
+
+  <!-- data table with enhanced features -->
+  <div class="table-header">
+    <h3><i class="fas fa-table"></i> Property Details</h3>
+    <div class="table-controls">
+      <span id="rowCount" class="row-count">0 rows</span>
+      <button id="expandAllBtn" class="btn-small"><i class="fas fa-chevron-down"></i> Expand all</button>
+      <button id="resetFilters" class="btn-small"><i class="fas fa-undo"></i> Reset</button>
+    </div>
+  </div>
+  
+  <div class="table-wrapper" id="tableWrapper">
+    <table class="data-table" id="dataTable">
+      <thead>
+        <tr id="headerRow">
+          <th class="expand-col"></th>
+          <th class="sortable" data-col="Plot_Z4">Plot <i class="fas fa-sort"></i></th>
+          <th class="sortable" data-col="PHASE_Z4">Phase <i class="fas fa-sort"></i></th>
+          <th class="sortable" data-col="Block_Z4">Block <i class="fas fa-sort"></i></th>
+          <th class="sortable" data-col="Scheme_Z4">Scheme <i class="fas fa-sort"></i></th>
+          <th>Plot area</th>
+          <th>DC</th>
+          <th>Total</th>
+          <th>2024 paid</th>
+          <th>2025 paid</th>
+          <th>Progress</th>
+          <th>Status</th>
+        </tr>
+        <tr id="filterRowTable" class="filter-row">
+          <th></th>
+          <th><input type="text" placeholder="Filter Plot" data-col="Plot_Z4"></th>
+          <th><input type="text" placeholder="Filter Phase" data-col="PHASE_Z4"></th>
+          <th><input type="text" placeholder="Filter Block" data-col="Block_Z4"></th>
+          <th><input type="text" placeholder="Filter Scheme" data-col="Scheme_Z4"></th>
+          <th><input type="text" placeholder="Min Area" data-col="Plot_Area_Z4" class="number-filter"></th>
+          <th><input type="text" placeholder="Filter DC" data-col="DC_Z4"></th>
+          <th><input type="text" placeholder="Min Total" data-col="Total_Z4" class="number-filter"></th>
+          <th><input type="text" placeholder="Min 2024" data-col="2024_PAID_Z4" class="number-filter"></th>
+          <th><input type="text" placeholder="Min 2025" data-col="2025_PAID_Z4" class="number-filter"></th>
+          <th></th>
+          <th><input type="text" placeholder="Filter Status" data-col="PT_STATUS_Z4"></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="12" style="text-align:center;">Loading data...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- loading indicator -->
+  <div id="loadingIndicator" class="loading-indicator hidden">
+    <i class="fas fa-spinner fa-spin"></i> Loading zone4_data.csv ...
+  </div>
+</div>
+
+<script src= "dashboard.js"></script>
+</body>
+</html>

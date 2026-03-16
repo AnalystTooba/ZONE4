@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Housing Schemes Analytics</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+    <div class="main-content">
+        <!-- Scheme Selection-->
+        <div class="floating-dropdown">
+            <select id="scheme-dropdown">
+                <option value="">SELECT HOUSING SCHEME</option>
+                <option value="ALL_Z4">Complete Zone 4</option>
+                <option value="A1">A1 HOMES SOCIETY</option>
+                <option value="AL">AIR LINE SOCIETY</option>
+                <option value="AHT">ALHAMRA TOWN</option>
+                <option value="ALT">ALI TOWN</option>
+                <option value="ARC">ARCHITECT SOCIETY</option>
+                <option value="AA">AUDIT AND ACCOUNTS HOUSING SOCIETY PHASE-I</option>
+                <option value="AW">AWAISIA HOUSING SOCIETY</option>
+                <option value="BOR">BOR (BOARD OF REVENUE HOUSING SOCIETY)</option>
+                <option value="EB">EDEN BOULEVARD</option>
+                <option value="UET">ENGINEERING UNIVERSITY HOUSING SCHEME (UET)</option>
+                <option value="ET">ENGINEERS TOWN SECTOR A</option>
+                <option value="FG">FAISAL GARDEN</option>
+                <option value="GCP">GCP HOUSING SCHEME</option>
+                <option value="GD">GUL E DAMAN HOUSING SOCIETY</option>
+                <option value="GM">GULSHAN E MUSTAFA SOCIETY</option>
+                <option value="IA">IQBAL AVENUE COOPERATIVE HOUSING SOCIETY</option>
+                <option value="JA">JOHAR AVENUE</option>
+                <option value="LA">LAHORE AVENNUE HOUSING SCHEME</option>
+                <option value="JT1">M.A JOHAR TOWN PHASE-I</option>
+                <option value="JT2">M.A JOHAR TOWN PHASE-II</option>
+                <option value="MA">MILITARY ACCOUNTS COOPERATIVE HOUSING SOCIETY</option>
+                <option value="MT">MUHAFIZ TOWN</option>
+                <option value="NI1">NASHEMAN IQBAL PHASE-I</option>
+                <option value="NI2">NASHEMAN IQBAL PHASE-II</option>
+                <option value="NWT">NAWAB TOWN</option>
+                <option value="NT">NAZ TOWN</option>
+                <option value="NESPAK1">NESPAK PHASE-I</option>
+                <option value="NFC">NFC HOUSING SOCIETY PHASE-I</option>
+                <option value="OPF">OPF HOUSING SCHEME</option>
+                <option value="PCSIR1">PCSIR EMPLOYEES STAFF COLONY</option>
+                <option value="PGECHS1">PAKISTAN EMPLOYEES COOPERATIVE HOUSING SOCIETY PHASE-I</option>
+                <option value="PGECHS2">PAKISTAN EMPLOYEES COOPERATIVE HOUSING SOCIETY PHASE-II</option>
+                <option value="PIA">PIA HOUSING SOCIETY</option>
+                <option value="PU">PUNJAB UNIVERSITY HOUSING SOCIETY</option>
+                <option value="REV">REVENUE EMPLOYEES COOPERATIVE HOUSING SOCIETY</option>
+                <option value="SF">SUNFLOWER HOUSING SOCIETY</option>
+                <option value="SP">SUNNY PARK</option>
+                <option value="VAL">VALENCIA HOUSING SOCIETY</option>
+                <option value="WT1">WAPDA TOWN PHASE-I</option>
+                <option value="WT2">WAPDA TOWN PHASE-II</option>
+            </select>
+        </div>
+        <div class="nav-tabs" style="position: absolute; top: 20px; left: 300px; z-index: 1000; background: transparent; border: none;">
+            <a href="dashboard.html" style="background: rgba(17,34,64,0.95); color: #64ffda; padding: 8px 20px; border-radius: 8px; text-decoration: none; border: 1px solid #64ffda;">
+                ← Back to Dashboard
+            </a>
+        </div>
+        <!-- summary -->
+        <div class="right-side-summary">
+            <!-- AD -->
+            <div class="ad-info-box">
+                <div class="ad-info-content">
+                    <h3 class="ad-info-title">AD NAME</h3>
+                    <p class="ad-info-value" id="ad-name">Not Selected</p>
+                </div>
+                <div class="ad-info-icon">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+            </div>
+            
+            <!-- Summary Boxes -->
+            <div class="summary-box">
+                <div class="summary-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="summary-content">
+                    <h3 class="summary-title">TOTAL DUES</h3>
+                    <p class="summary-value" id="total-dues"> 0</p>
+                </div>
+            </div>
+            
+            <div class="summary-box">
+                <div class="summary-icon">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <div class="summary-content">
+                    <h3 class="summary-title">RECOVERY (2025 ONLY)</h3>
+                    <p class="summary-value" id="total-paid"> 0</p>
+                </div>
+            </div>
+            
+            <div class="summary-box">
+                <div class="summary-icon">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <div class="summary-content">
+                    <h3 class="summary-title">PENDING DUES</h3>
+                    <p class="summary-value" id="pending-dues"> 0</p>
+                </div>
+            </div>
+            
+            <div class="summary-box">
+                <div class="summary-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="summary-content">
+                    <h3 class="summary-title">ILLEGAL PLOTS</h3>
+                    <p class="summary-value" id="illegal-plots">0</p>
+                </div>
+            </div>
+        </div>
+        <!-- container -->
+        <div class="dashboard-container">
+            <div class="map-container">
+                <div id="map"></div>
+                
+                <!-- Legend -->
+                <div class="map-legend">
+                    <h4>Payment Status</h4>
+                    <div class="legend-item">
+                        <div class="legend-color full-paid"></div>
+                        <span>Full Paid</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color partial-paid"></div>
+                        <span>Partial Paid</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color not-paid"></div>
+                        <span>Not Paid</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color residential"></div>
+                        <span>Abandoned/Use Restored</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color perm-comm"></div>
+                        <span>Perm. Comm</span>
+                    </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div class="loading-indicator" id="loading" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Loading Scheme Data...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="INDEX.js"></script>
+</body>
+</html>
